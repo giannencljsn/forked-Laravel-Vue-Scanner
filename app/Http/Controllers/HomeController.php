@@ -36,18 +36,18 @@ class HomeController extends Controller
 		}
 		else
 		{
-            $allData=Order::where('ordernumber', 'LIKE', "%{$query}%")->latest()->get();		
+            $allData=Order::where('ordernumber', 'LIKE', "%{$query}%")->latest()->get();
 		}
 		return response()->json([
             'allData' => $allData,
-        ]); 	
+        ]);
 	}
     public function order_list()
     {
         $allData = Order::latest()->get();
 		return response()->json([
 		  'allData' => $allData
-		]); 
+		]);
     }
     public function order_submit(Request $request)
     {
@@ -78,13 +78,13 @@ class HomeController extends Controller
             }
         }
 
-        $orderproduct = OrderProduct::where('order_id',$data->id)->get(); 
+        $orderproduct = OrderProduct::where('order_id',$data->id)->get();
         $data->total = $orderproduct->sum('total');
         $data->update();
 
         $message="Order submitted successfully.";
         $status = 1;
-        
+
         return response()->json([
           'message' => $message,
           'status' => $status
@@ -110,7 +110,7 @@ class HomeController extends Controller
         return response()->json([
             'message' => $message,
             'status' => $status
-        ]); 
+        ]);
     }
     public function product_quantity_decrement($id)
     {
@@ -135,7 +135,7 @@ class HomeController extends Controller
         return response()->json([
             'message' => $message,
             'status' => $status
-        ]); 
+        ]);
     }
     public function product_removefrom_cart($id)
     {
@@ -154,7 +154,7 @@ class HomeController extends Controller
         return response()->json([
             'message' => $message,
             'status' => $status
-        ]); 
+        ]);
     }
     public function products_cart()
     {
@@ -163,61 +163,63 @@ class HomeController extends Controller
 		return response()->json([
 		  'allData' => $allData,
           'sum' => $sum
-		]); 
+		]);
     }
-    public function product_addto_cart($id)
-    {
-        $message="Sorry somthing went wrong,please try again.";
-        $status = 0;
+    public function product_addto_cart($name)
+{
+    $message = "Sorry, something went wrong, please try again.";
+    $status = 0;
 
-        $product = Product::find($id);
-        if($product == null)
-        {
-            $message="Product not found ,please try again.";
-            $status = 0;
-            return response()->json([
-                'message' => $message,
-                'status' => $status
-            ]);
-        }
-        
-        $data= Cart::where('product_id',$id)->first();
-        if($data != null)
-        {
-            $data->quantity = $data->quantity + 1;
-            $data->total = $data->quantity * $data->price;
-            $update = $data->update();
-            $message="Product quantity updated to cart.";
-            $status = 1;
-        }
-        else
-        {
-            $data = new Cart();
-            $data->product_id = $product->id;
-            $data->name = $product->name;
-            $data->image = $product->image;
-            $data->description = $product->description;
-            $data->price = $product->price;
-            $data->quantity = 1;
-            $data->total = $data->price * $data->quantity;
-            $save = $data->save();
-            
-            $message="Product added to cart.";
-            $status = 1;
-        }
-        
+    // Find the product by its name instead of id
+    $product = Product::where('name', $name)->first();
+
+    // Check if the product exists
+    if ($product == null) {
+        $message = "Product not found, please try again.";
+        $status = 0;
         return response()->json([
             'message' => $message,
             'status' => $status
-        ]); 
-
+        ]);
     }
+
+    // Check if the product is already in the cart
+    $data = Cart::where('product_id', $product->id)->first();
+    if ($data != null) {
+        // If the product is in the cart, update its quantity
+        $data->quantity = $data->quantity + 1;
+        $data->total = $data->quantity * $data->price;
+        $update = $data->update();
+        $message = "Product quantity updated in the cart.";
+        $status = 1;
+    } else {
+        // If the product is not in the cart, add it
+        $data = new Cart();
+        $data->product_id = $product->id;
+        $data->name = $product->name;
+        $data->image = $product->image;
+        $data->description = $product->description;
+        $data->price = $product->price;
+        $data->quantity = 1;
+        $data->total = $data->price * $data->quantity;
+        $save = $data->save();
+
+        $message = "Product added to cart.";
+        $status = 1;
+    }
+
+    return response()->json([
+        'message' => $message,
+        'status' => $status
+    ]);
+}
+
     public function products()
     {
         $allData = Product::latest()->get();
 		return response()->json([
 		  'allData' => $allData
-		]); 
+		]);
     }
     public function products_search(Request $request)
 	{
@@ -228,11 +230,11 @@ class HomeController extends Controller
 		}
 		else
 		{
-            $allData=Product::where('name', 'LIKE', "%{$query}%")->latest()->get();		
+            $allData=Product::where('name', 'LIKE', "%{$query}%")->latest()->get();
 		}
 		return response()->json([
             'allData' => $allData,
-        ]); 	
+        ]);
 	}
 
 
